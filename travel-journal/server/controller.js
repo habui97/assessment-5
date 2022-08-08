@@ -12,8 +12,29 @@ const sequelize = new Sequelize(CONNECTION_STRING,{
   })
 
 module.exports = {
+    getCountries: (req, res) => {
+        sequelize.query(`SELECT * FROM countries;`).then(dbRes => res.status(200).send(dbRes[0]))
+    },
+    createCity: (req, res) => {
+        const {name, rating, countryID} = req.body;
+        sequelize.query(`INSERT INTO cities (name, rating, country_id) VALUE('${name}', ${rating}, ${countryID});`).then(dbRes => res.status(200).send(dbRes[0]))
+    },
+    getCities: (req, res) => {
+        sequelize.query(`SELECT ci.city_id, ci.name AS city, ci.rating, co.country_id, co.name AS country FROM cities AS ci JOIN country AS co ON ci.country_id = co.country_id;`).then(dbRes =res.status(200).send(dbRes[0]))
+    },
+    deleteCity: (req, res) => {
+        sequelize.query(`DELETE FROM cities WHERE city_id = ${req.param.id};`).then(dbRes => res.status(200).send(dbRes[0]))
+    },
     seed: (req, res) => {
         sequelize.query(` 
+            drop table if exists cities;
+            drop table of exists countries;
+
+            create table countries (
+                country_id serial primary key,
+                name varchar
+            );
+            
             CREATE TABLE cities (
                 city_id SERIAL PRIMARY KEY,
                 name VARCHAR(rating) INTEGER,
